@@ -9,7 +9,7 @@ BLACK = (0,0,0)
 
 FPS = 30
 
-GAME_WIDTH = 1100
+GAME_WIDTH = 1750
 GAME_HEIGHT = 500
 
 GAME = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
@@ -28,7 +28,7 @@ DINO_HEIGHT = DINO_JUMP.get_height()
 DINO_WIDTH = DINO_JUMP.get_width()
 DINO_DEFAULT_X = 200
 DINO_DEFAULT_Y = GROUND_DEFAULT_Y - 60
-DINO_JUMP_VELOCITY = 8.5
+DINO_JUMP_VELOCITY = 9.5
 
 
 LARGE_CACTUS = [pygame.image.load(os.path.join("imgs","Cactus","LargeCactus1.png")),
@@ -40,11 +40,12 @@ SMALL_CACTUS = [pygame.image.load(os.path.join("imgs","Cactus","SmallCactus1.png
                 pygame.image.load(os.path.join("imgs","Cactus","SmallCactus3.png"))]
 
 
-GAME_SPEED = 20
+GAME_SPEED = 75
 ANIM_SPEED = 3
 
 
 SCORE = 0
+
 FONT = pygame.font.SysFont('comicsans', 44)
 
 

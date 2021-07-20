@@ -7,8 +7,9 @@ class Dino:
         self.img_ind = 0
         self.dino_x = DINO_DEFAULT_X
         self.dino_y = DINO_DEFAULT_Y
-        self.jump_vel = DINO_JUMP_VELOCITY
-        self.coeff = 4
+        self.jump_vel = 0
+        self.time = 0
+        self.acceleration = 2
 
         self.dino_jump = False
         self.dino_run = True
@@ -16,32 +17,30 @@ class Dino:
 
     def jump(self):
         if self.dino_jump:
-            self.dino_y -= self.jump_vel*self.coeff
-            self.shape.y = self.dino_y
-            self.jump_vel -= 0.8
-        if self.jump_vel < - DINO_JUMP_VELOCITY:
-            self.dino_jump = False
-            self.jump_vel = DINO_JUMP_VELOCITY
+            return
+        else:
+            self.time = 0
+            self.jump_vel = -DINO_JUMP_VELOCITY
 
-    def run(self):
-        self.dino_y = DINO_DEFAULT_Y
-        self.dino_x = DINO_DEFAULT_X
 
+    def move(self):
+        self.time += 1
+        # s = u*t + 0.5*a*t^2
+        displacement = self.jump_vel*self.time + 0.5*self.acceleration*self.time**2
+        if displacement > 20:
+            displacement = 20
+        elif displacement < 0:
+            displacement -= 3
+
+        self.dino_y += displacement
         self.shape.y = self.dino_y
-
-    def apply_movement(self,inp):
-        if self.dino_jump:
-            self.jump()
-        elif self.dino_run:
-            self.run()
-
-        if inp[pygame.K_SPACE] and not self.dino_jump:
-            self.dino_jump = True
-            self.dino_run = False
-
-        elif not self.dino_jump:
-            self.dino_run = True
+        if self.dino_y >= DINO_DEFAULT_Y:
             self.dino_jump = False
+            self.dino_y  = DINO_DEFAULT_Y
+        else:
+            self.dino_jump = True
+       
+        
 
     def animate(self):
         self.img_ind += 1
@@ -53,7 +52,7 @@ class Dino:
             self.img_ind = DINO_RUNNING[0]
             self.img_ind = 0
 
-        if self.dino_jump:
+        if self.dino_jump and  self.dino_y < DINO_DEFAULT_Y:
             self.img = DINO_JUMP
             self.img_ind = 0
        
@@ -61,3 +60,5 @@ class Dino:
 
     def draw(self):
         self.animate()
+
+   
