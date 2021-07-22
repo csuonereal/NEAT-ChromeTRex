@@ -45,10 +45,20 @@ ANIM_SPEED = 3
 
 
 SCORE = 0
+GEN = 0
 
 FONT = pygame.font.SysFont('comicsans', 44)
 
 
-def draw_score(score):
-    txt = FONT.render("Score:"+str(score), 1, BLACK)
-    GAME.blit(txt, (10,10))
+def draw_score(score,gen,dinos):
+    score_txt = FONT.render("Score:"+str(score), 1, BLACK)
+    gen_txt = FONT.render("Gen:"+str(gen), 1, BLACK)
+    alive_txt = FONT.render("Alive: " + str(len(dinos)),1,BLACK)
+   
+   
+    GAME.blit(score_txt, (10,10))
+    GAME.blit(gen_txt, (10,50))
+    GAME.blit(alive_txt, (10,90))
+
+
+  

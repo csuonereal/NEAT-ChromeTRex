@@ -4,22 +4,24 @@ from constants import *
 from dinosaur import *
 from ground import *
 from cactus import *
+import pickle
 
 
 
-def draw_screen(dinos,obstacles,ground,score):
+def draw_screen(dinos,obstacles,ground,score,gen):
     GAME.fill(WHITE)
     ground.draw()
     for obstacle in obstacles:
         obstacle.draw()
     for dino in dinos:
         dino.draw()
-    draw_score(score)
+    draw_score(score,gen,dinos)
 
 def main(genomes,config):
 
-    global SCORE
+    global SCORE, GEN
     SCORE  = 0
+    GEN += 1
 
     dinos = []
     genomes_ = [] # it will allow me to reach genomes whenever i want.
@@ -49,7 +51,9 @@ def main(genomes,config):
         obstacle_dino_ground_controller(obstacles,dinos,ground,nets,genomes_)
 
         SCORE += 1
-        draw_screen(dinos,obstacles,ground,SCORE)
+        if SCORE >= 1000: 
+            break
+        draw_screen(dinos,obstacles,ground,SCORE,GEN)
         pygame.display.update()
 
 
@@ -98,12 +102,38 @@ def run(config_file):
     population.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
-    winner = population.run(main,66)
+    winner = population.run(main,50)
     print('\nBest genome:\n{!s}'.format(winner))
+
+
+
+    with open("winner.pkl", "wb") as f:
+        pickle.dump(winner, f)
+        f.close()
+
+
+def replay_genome(config_path, genome_path="winner.pkl"):
+    # Load requried NEAT config
+    config = neat.config.Config(neat.DefaultGenome, 
+                                neat.DefaultReproduction, 
+                                neat.DefaultSpeciesSet, 
+                                neat.DefaultStagnation, config_path)
+
+    # Unpickle saved winner
+    with open(genome_path, "rb") as f:
+        genome = pickle.load(f)
+
+    # Convert loaded genome into required data structure
+    genomes = [(1, genome)]
+
+    # Call game with only the loaded genome
+    main(genomes, config)
+
+
 
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir,"neatconf.txt")
     run(config_path)
-
+    #replay_genome(config_path)
