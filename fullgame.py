@@ -4,6 +4,7 @@ from random import randint
 import pygame
 
 
+
 pygame.init()
 pygame.font.init()
 
@@ -37,6 +38,7 @@ DINO_DUCK = [pygame.image.load(os.path.join("Assets","Dino","DinoDuck1.png")),
 
 DINO_DEAD = pygame.image.load(os.path.join("Assets","Dino","DinoDead.png"))
 DINO_START = pygame.image.load(os.path.join("Assets","Dino","DinoStart.png"))
+DINO_DEAD = pygame.image.load(os.path.join("Assets","Dino","DinoDead.png"))
 
 DINO_HEIGHT = DINO_JUMP.get_height()
 DINO_WIDTH = DINO_JUMP.get_width()
@@ -60,6 +62,10 @@ ANIM_SPEED = 3
 
 SCORE = 0
 
+
+GAME_OVER = pygame.image.load(os.path.join("Assets","Other","GameOver.png"))
+RESET = pygame.image.load(os.path.join("Assets","Other","Reset.png"))
+
 FONT = pygame.font.SysFont('comicsans', 44)
 
 class Rex:
@@ -75,14 +81,13 @@ class Rex:
         self.img = DINO_START
         self.img_count = 0
         self.shape = self.img.get_rect().move(self.x,self.y)
+        self.is_alive = True
 
     def jump(self):
         if self.y == DINO_DEFAULT_Y:
             self.jump_velocity = -DINO_JUMP_VELOCITY
             self.time = 0    
             self.dino_jump = False
-        
- 
 
     def move(self):
         #displacement = velocity * time + 1/2 * acceleration * time^2
@@ -127,29 +132,39 @@ class Rex:
             self.key = 0
   
     def animate(self):
-        self.img_count += 1
-        if self.dino_run:
-            if self.img_count <= ANIM_SPEED:
-                self.img = DINO_RUNNING[0]
-            elif self.img_count <= ANIM_SPEED*2:
-                self.img = DINO_RUNNING[1]
-            elif self.img_count <= ANIM_SPEED*3:
-                self.img = DINO_RUNNING[0]
+
+        if self.is_alive:
+            self.img_count += 1
+            if self.dino_run:
+                if self.img_count <= ANIM_SPEED:
+                    self.img = DINO_RUNNING[0]
+                elif self.img_count <= ANIM_SPEED*2:
+                    self.img = DINO_RUNNING[1]
+                elif self.img_count <= ANIM_SPEED*3:
+                    self.img = DINO_RUNNING[0]
+                    self.img_count = 0
+            if self.dino_jump:
+                self.img = DINO_JUMP
                 self.img_count = 0
-        if self.dino_jump:
-            self.img = DINO_JUMP
-            self.img_count = 0
-        if self.dino_duck: 
-            self.y = DINO_DEFAULT_Y + 30
-            if self.img_count <= ANIM_SPEED:
-                self.img = DINO_DUCK[0]
-            elif self.img_count <= ANIM_SPEED*2:
-                self.img = DINO_DUCK[1]
-            elif self.img_count <= ANIM_SPEED*3:
-                self.img = DINO_DUCK[0]
-                self.img_count = 0
+            if self.dino_duck: 
+                self.y = DINO_DEFAULT_Y + 30
+                if self.img_count <= ANIM_SPEED:
+                    self.img = DINO_DUCK[0]
+                elif self.img_count <= ANIM_SPEED*2:
+                    self.img = DINO_DUCK[1]
+                elif self.img_count <= ANIM_SPEED*3:
+                    self.img = DINO_DUCK[0]
+                    self.img_count = 0
+        else:
+            self.img = DINO_DEAD
         self.shape = self.img.get_rect().move(self.x, self.y)
         GAME.blit(self.img, (self.x, self.y))
+        print(self.is_alive)
+        if not self.is_alive:
+            game_over()
+            pygame.time.delay(4000)
+            main()
+       
 
     def draw(self):
         self.animate()
@@ -261,21 +276,25 @@ class Cactus:
         GAME.blit(self.img, (self.x, self.y))
 
 
+def draw_score(score):
+    txt = FONT.render("Score:"+str(score), 1, BLACK)
+    GAME.blit(txt, (10,10))
 
-def draw_screen(rex,floor,obstacles, cloud):
+def draw_screen(rex,floor,obstacles, cloud, score):
     GAME.fill(WHITE)
+    FONT
     floor.draw()
     rex.draw()
     cloud.draw()
     for obstacle in obstacles:
         obstacle.draw()
+    draw_score(score)
   
-   
-
     pygame.display.update()
 
 def main():
-
+    global SCORE
+    SCORE = 0
     rex = Rex()
     floor = Floor()
     bird_or_cactus = randint(0,1)
@@ -296,9 +315,12 @@ def main():
                 run =False
                 pygame.quit()
                 quit()
+        SCORE += 1
+    
+
         user_inputs = pygame.key.get_pressed()
         dino_ground_obstacle_controller(user_inputs, rex, floor, obstacles, cloud)
-        draw_screen(rex,floor,obstacles, cloud)
+        draw_screen(rex,floor,obstacles, cloud, SCORE)
 
 
 def dino_ground_obstacle_controller(inputs, dino, ground, obstacles, cloud):
@@ -314,13 +336,17 @@ def dino_ground_obstacle_controller(inputs, dino, ground, obstacles, cloud):
             elif bird_or_cactus == 1:
                 obstacles.append(Bird())
 
-
         if obstacle.collision_control(dino):
-            print("dino died")
-            quit()
+            dino.is_alive = False
+
 
         ground.move()
         cloud.move()
+
+
+def game_over():
+    GAME.blit(GAME_OVER, (GAME_WIDTH/2-GAME_OVER.get_width()/2, GAME_HEIGHT/2 - GAME_OVER.get_height()/2))
+    pygame.display.update()
 
             
 
